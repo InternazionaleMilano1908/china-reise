@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deine China-Reise: Was gefällt dir?</title>
+<style>
+:root{--bg:#faf6f0;--fg:#1d1b19;--mut:#6b655e;--card:#fff;--line:#e4dccf;--acc:#c8102e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171514;--fg:#f3ede6;--mut:#a39a90;--card:#232020;--line:#3a3532;--acc:#ff5a6e}}
+:root[data-theme="dark"]{--bg:#171514;--fg:#f3ede6;--mut:#a39a90;--card:#232020;--line:#3a3532;--acc:#ff5a6e}
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-tap-highlight-color:transparent}
+#app{max-width:520px;margin:0 auto;padding:16px;min-height:100%;display:flex;flex-direction:column}
+h1{font-size:1.5rem;margin:8px 0}p{color:var(--mut);line-height:1.5}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin:4px 0 12px}
+.bar i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.q{text-align:center;font-weight:600;margin:0 0 10px}
+.pair{flex:1;display:flex;flex-direction:column;gap:12px}
+.opt{flex:1;min-height:150px;border:0;border-radius:18px;color:#fff;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.2);transition:transform .12s}
+.opt:active{transform:scale(.97)}
+.opt .e{position:absolute;top:8px;right:14px;font-size:4.5rem;opacity:.95;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
+.opt b{font-size:1.25rem;text-shadow:0 1px 4px rgba(0,0,0,.5)}.opt span{font-size:.9rem;opacity:.95;text-shadow:0 1px 4px rgba(0,0,0,.5)}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:14px;padding:14px 18px;font:inherit;font-weight:600;width:100%;margin-top:10px;cursor:pointer;display:block;text-align:center;text-decoration:none}
+.btn.alt{background:var(--card);color:var(--fg);border:1px solid var(--line)}
+input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;margin:8px 0}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:6px 0}
+.row div{display:flex;justify-content:space-between;font-weight:600}.row .bar{margin:6px 0 0}
+textarea{width:100%;height:170px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);padding:10px;font:.85rem ui-monospace,monospace}
+.small{font-size:.85rem}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// Kriterien: leicht erweiterbar. Optional: img:"data:image/jpeg;base64,..." für eigenes Foto.
+const C=[
+{id:"Skyline & Moderne",e:"🏙️",t:"Wolkenkratzer, Lichtshows",p:"Shanghai, Shenzhen, Chongqing",g:["#1e3c72","#2a5298"]},
+{id:"Tradition & Geschichte",e:"🏯",t:"Kaiserstädte, Tempel, Mauern",p:"Xi’an, Luoyang, Peking",g:["#8e2de2","#c0392b"]},
+{id:"Ländliches Leben",e:"🌾",t:"Reisterrassen, Dörfer",p:"Guizhou, Yunnan",g:["#56ab2f","#a8c030"]},
+{id:"Berge & Natur",e:"⛰️",t:"Karstgipfel, Wandern",p:"Zhangjiajie, Guilin, Huangshan",g:["#134e5e","#71b280"]},
+{id:"Essen & Streetfood",e:"🥟",t:"Hotpot, Nudeln, Märkte",p:"Chengdu, Xi’an, Guangzhou",g:["#e65c00","#f9d423"]},
+{id:"Wasserstädte & Altstädte",e:"🛶",t:"Kanäle, Gassen, Laternen",p:"Suzhou, Lijiang, Pingyao",g:["#0083b0","#00b4db"]},
+{id:"Wüste & Weite",e:"🐪",t:"Dünen, Seidenstraße",p:"Dunhuang, Xinjiang",g:["#c79081","#dfa579"]},
+{id:"Minderheiten & Kultur",e:"🎎",t:"Trachten, Feste, Handwerk",p:"Guizhou, Yunnan, Tibet-Rand",g:["#b24592","#f15f79"]},
+{id:"Tiere & Tierwelt",e:"🐼",t:"Pandas und mehr",p:"Chengdu, Sichuan",g:["#232526","#5c6b73"]},
+{id:"Nachtleben & Shopping",e:"🌃",t:"Neon, Märkte, Bars",p:"Shanghai, Guangzhou, Hongkong",g:["#0f0c29","#7b2ff7"]},
+{id:"Zug & Technik",e:"🚄",t:"Hochgeschwindigkeit, Apps, Zukunft",p:"Quer durchs Land",g:["#373b44","#4286f4"]},
+{id:"Ruhe & Spiritualität",e:"🧘",t:"Klöster, Tee, Gärten",p:"Wudang, Hangzhou, Lushan",g:["#4b6cb7","#6dd5a0"]}
+];
+const PER=3; // wie oft jedes Kriterium vorkommt
+let pairs,i,S,name,app=document.getElementById("app");
+const sh=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a};
+function build(){
+ for(let tries=0;tries<50;tries++){
+  const seen=new Set(),out=[];let ok=true;
+  for(let r=0;r<PER&&ok;r++){
+   const a=sh(C.map((_,k)=>k));
+   for(let k=0;k+1<a.length;k+=2){const key=[a[k],a[k+1]].sort().join("-");if(seen.has(key)){ok=false;break}seen.add(key);out.push(Math.random()<.5?[a[k],a[k+1]]:[a[k+1],a[k]])}
+  }
+  if(ok)return out;
+ }
+ return sh(C.map((_,k)=>k)).reduce((o,x,k,a)=>k%2?o:[...o,[x,a[k+1]]],[]);
+}
+function start(){
+ app.innerHTML=`<h1>🇨🇳 Deine China-Reise</h1><p>Dir werden ${C.length/2*PER} Mal zwei Bilder gezeigt. Tippe jeweils auf das, was dich mehr reizt. Danach siehst du dein Reiseprofil, das du mir einfach schicken kannst. Dauert ca. 2 Minuten.</p><input id="n" placeholder="Dein Name (optional)" autocomplete="name"><button class="btn" id="go">Los geht’s</button>`;
+ document.getElementById("go").onclick=()=>{name=document.getElementById("n").value.trim();pairs=build();i=0;S=C.map(()=>({w:0,n:0}));show()};
+}
+function card(k,o){const c=C[k];const bg=c.img?`url(${c.img}) center/cover`:`linear-gradient(135deg,${c.g[0]},${c.g[1]})`;
+ return `<button class="opt" style="background:${bg}" data-k="${k}"><div class="e">${c.img?"":c.e}</div><b>${c.id}</b><span>${c.t}</span><span class="small">${c.p}</span></button>`}
+function show(){
+ if(i>=pairs.length)return result();
+ const [a,b]=pairs[i];
+ app.innerHTML=`<div class="bar"><i style="width:${i/pairs.length*100}%"></i></div><p class="q">Was gefällt dir mehr? (${i+1}/${pairs.length})</p><div class="pair">${card(a)}${card(b)}</div>`;
+ app.querySelectorAll(".opt").forEach(el=>el.onclick=()=>{const w=+el.dataset.k;S[a].n++;S[b].n++;S[w].w++;i++;show()});
+}
+function result(){
+ const r=C.map((c,k)=>({n:c.id,p:S[k].n?Math.round(S[k].w/S[k].n*100):0,w:S[k].w,m:S[k].n})).sort((x,y)=>y.p-x.p);
+ const txt=`China-Reise Vorlieben${name?" von "+name:""}\n`+r.map((x,k)=>`${k+1}. ${x.n}: ${x.p}% (${x.w}/${x.m})`).join("\n");
+ app.innerHTML=`<h1>Dein Reiseprofil</h1><p>Ganz oben steht, was dich am meisten reizt.</p>${r.map(x=>`<div class="row"><div><span>${x.n}</span><span>${x.p}%</span></div><div class="bar"><i style="width:${x.p}%"></i></div></div>`).join("")}
+ <p class="q" style="margin-top:16px">Ergebnis an mich schicken:</p><textarea id="t" readonly>${txt}</textarea>
+ <button class="btn" id="cp">📋 Ergebnis kopieren</button><a class="btn alt" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(txt)}">💬 Per WhatsApp senden</a><button class="btn alt" id="re">Nochmal von vorn</button>`;
+ document.getElementById("cp").onclick=async function(){const t=document.getElementById("t");try{await navigator.clipboard.writeText(txt)}catch(e){t.select();document.execCommand("copy")}this.textContent="✅ Kopiert!"};
+ document.getElementById("re").onclick=start;
+}
+start();
+</script>
+</body>
+</html>
