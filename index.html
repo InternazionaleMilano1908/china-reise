@@ -37,17 +37,14 @@ textarea{width:100%;height:170px;border-radius:12px;border:1px solid var(--line)
 <script>
 // Kriterien: leicht erweiterbar. Optional: img:"data:image/jpeg;base64,..." für eigenes Foto.
 const C=[
-{id:"Skyline & Moderne",e:"🏙️",t:"Wolkenkratzer, Lichtshows",p:"Shanghai, Shenzhen, Chongqing",g:["#1e3c72","#2a5298"]},
+{id:"Skyline & Moderne",e:"🏙️",t:"Wolkenkratzer, Lichtshows",p:"Shanghai, Chongqing, Hongkong",g:["#1e3c72","#2a5298"]},
 {id:"Tradition & Geschichte",e:"🏯",t:"Kaiserstädte, Tempel, Mauern",p:"Xi’an, Luoyang, Peking",g:["#8e2de2","#c0392b"]},
 {id:"Ländliches Leben",e:"🌾",t:"Reisterrassen, Dörfer",p:"Guizhou, Yunnan",g:["#56ab2f","#a8c030"]},
 {id:"Berge & Natur",e:"⛰️",t:"Karstgipfel, Wandern",p:"Zhangjiajie, Guilin, Huangshan",g:["#134e5e","#71b280"]},
 {id:"Essen & Streetfood",e:"🥟",t:"Hotpot, Nudeln, Märkte",p:"Chengdu, Xi’an, Guangzhou",g:["#e65c00","#f9d423"]},
 {id:"Wasserstädte & Altstädte",e:"🛶",t:"Kanäle, Gassen, Laternen",p:"Suzhou, Lijiang, Pingyao",g:["#0083b0","#00b4db"]},
-{id:"Wüste & Weite",e:"🐪",t:"Dünen, Seidenstraße",p:"Dunhuang, Xinjiang",g:["#c79081","#dfa579"]},
-{id:"Minderheiten & Kultur",e:"🎎",t:"Trachten, Feste, Handwerk",p:"Guizhou, Yunnan, Tibet-Rand",g:["#b24592","#f15f79"]},
-{id:"Tiere & Tierwelt",e:"🐼",t:"Pandas und mehr",p:"Chengdu, Sichuan",g:["#232526","#5c6b73"]},
 {id:"Nachtleben & Shopping",e:"🌃",t:"Neon, Märkte, Bars",p:"Shanghai, Guangzhou, Hongkong",g:["#0f0c29","#7b2ff7"]},
-{id:"Zug & Technik",e:"🚄",t:"Hochgeschwindigkeit, Apps, Zukunft",p:"Quer durchs Land",g:["#373b44","#4286f4"]},
+{id:"Technik & Fortschritt",e:"🤖",t:"Hightech, Roboter, Zukunft",p:"Shenzhen, Shanghai, Hangzhou",g:["#373b44","#4286f4"]},
 {id:"Ruhe & Spiritualität",e:"🧘",t:"Klöster, Tee, Gärten",p:"Wudang, Hangzhou, Lushan",g:["#4b6cb7","#6dd5a0"]}
 ];
 
@@ -61,11 +58,8 @@ const IMG={
 "Berge & Natur":["bilder/berge.jpg"],
 "Essen & Streetfood":["bilder/essen.jpg"],
 "Wasserstädte & Altstädte":["bilder/wasserstadt.jpg"],
-"Wüste & Weite":["bilder/wueste.jpg"],
-"Minderheiten & Kultur":["bilder/kultur.jpg",W("Danjiang, Miao village, women at festival.jpg")],
-"Tiere & Tierwelt":["bilder/tiere.jpg"],
 "Nachtleben & Shopping":["bilder/nacht.jpg"],
-"Zug & Technik":["bilder/zug.jpg",W("A maglev train coming out, Pudong International Airport, Shanghai.jpg")],
+"Technik & Fortschritt":["bilder/technik.jpg"],
 "Ruhe & Spiritualität":["bilder/ruhe.jpg"]
 };
 // Wikipedia-Artikel (englisch), pro Kriterium mehrere Kandidaten, der erste mit Bild zählt
@@ -76,11 +70,8 @@ const WIKI={
 "Berge & Natur":["Zhangjiajie National Forest Park","Wulingyuan","Huangshan"],
 "Essen & Streetfood":["Hot pot","Chinese cuisine"],
 "Wasserstädte & Altstädte":["Old Town of Lijiang","Lijiang","Suzhou"],
-"Wüste & Weite":["Mingsha Mountain","Singing-Sand Dunes","Dunhuang"],
-"Minderheiten & Kultur":["Miao people","Hmong people"],
-"Tiere & Tierwelt":["Giant panda"],
 "Nachtleben & Shopping":["Nanjing Road","The Bund"],
-"Zug & Technik":["Shanghai maglev train","High-speed rail in China"],
+"Technik & Fortschritt":["Huaqiangbei","Shenzhen","Shanghai"],
 "Ruhe & Spiritualität":["West Lake","Lingyin Temple"]
 };
 let wikiImg={};
@@ -93,22 +84,22 @@ const wikiReady=(async()=>{try{
  for(const [id,list] of Object.entries(WIKI)){for(const t of list){const u=th[to[t]||t]||th[t];if(u){wikiImg[id]=u;break}}}
 }catch(e){}})();
 function nextImg(el){const l=JSON.parse(el.dataset.l);if(l.length){el.src=l.shift();el.dataset.l=JSON.stringify(l)}else el.remove()}
-const PER=3; // wie oft jedes Kriterium vorkommt
+const PER=4; // wie oft jedes Kriterium vorkommt
 let pairs,i,S,name,app=document.getElementById("app");
 const sh=a=>{a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.random()*(k+1)|0;[a[k],a[j]]=[a[j],a[k]]}return a};
 function build(){
- for(let tries=0;tries<50;tries++){
-  const seen=new Set(),out=[];let ok=true;
-  for(let r=0;r<PER&&ok;r++){
-   const a=sh(C.map((_,k)=>k));
-   for(let k=0;k+1<a.length;k+=2){const key=[a[k],a[k+1]].sort().join("-");if(seen.has(key)){ok=false;break}seen.add(key);out.push(Math.random()<.5?[a[k],a[k+1]]:[a[k+1],a[k]])}
-  }
-  if(ok)return out;
+ const idx=C.map((_,k)=>k),rem=idx.map(()=>PER),seen=new Set(),out=[];
+ while(rem.some(x=>x>0)){
+  const o=sh(idx.filter(k=>rem[k]>0)).sort((x,y)=>rem[y]-rem[x]);
+  const a=o[0];if(o.length<2)break;
+  const b=o.slice(1).find(k=>!seen.has([a,k].sort().join("-")))??o[1];
+  seen.add([a,b].sort().join("-"));rem[a]--;rem[b]--;
+  out.push(Math.random()<.5?[a,b]:[b,a]);
  }
- return sh(C.map((_,k)=>k)).reduce((o,x,k,a)=>k%2?o:[...o,[x,a[k+1]]],[]);
+ return sh(out);
 }
 function start(){
- app.innerHTML=`<h1>🇨🇳 Deine China-Reise</h1><p>Dir werden ${C.length/2*PER} Mal zwei Bilder gezeigt. Tippe jeweils auf das, was dich mehr reizt. Danach siehst du dein Reiseprofil, das du mir einfach schicken kannst. Dauert ca. 2 Minuten.</p><input id="n" placeholder="Dein Name (optional)" autocomplete="name"><button class="btn" id="go">Los geht’s</button>`;
+ app.innerHTML=`<h1>🇨🇳 Deine China-Reise</h1><p>Dir werden ${Math.round(C.length*PER/2)} Mal zwei Bilder gezeigt. Tippe jeweils auf das, was dich mehr reizt. Danach siehst du dein Reiseprofil, das du mir einfach schicken kannst. Dauert ca. 2 Minuten.</p><input id="n" placeholder="Dein Name (optional)" autocomplete="name"><button class="btn" id="go">Los geht’s</button>`;
  document.getElementById("go").onclick=async()=>{await Promise.race([wikiReady,new Promise(r=>setTimeout(r,3000))]);name=document.getElementById("n").value.trim();pairs=build();i=0;S=C.map(()=>({w:0,n:0}));show()};
 }
 function card(k){const c=C[k];const l=[...(IMG[c.id]||[]),wikiImg[c.id]].filter(Boolean);
